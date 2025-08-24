@@ -1,47 +1,38 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const OpenAI = require('openai');
 
 async function run() {
   try {
     const token = core.getInput('github_token');
-    const openaiKey = core.getInput('openai_api_key');
     const octokit = github.getOctokit(token);
     const { context } = github;
 
     const { owner, repo } = context.repo;
     const release = context.payload.release;
 
-    // 1. Get commits since last release
+    // List recent commits (optional, still real data)
     const commits = await octokit.rest.repos.listCommits({
       owner,
       repo,
       sha: release.target_commitish,
-      per_page: 50
+      per_page: 10
     });
 
     const commitMessages = commits.data.map(c => `- ${c.commit.message}`).join("\n");
 
-    // 2. Summarize with OpenAI
-    const client = new OpenAI({ apiKey: openaiKey });
+    // --- MOCK OpenAI ---
+    const notes = `
+## Features
+- Example feature from commit messages
 
-    const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "Categorize commit messages into Features, Fixes, and Chores. Format in Markdown."
-        },
-        {
-          role: "user",
-          content: commitMessages
-        }
-      ]
-    });
+## Fixes
+- Example fix from commit messages
 
-    const notes = response.choices[0].message.content;
+## Chores
+- Example chore from commit messages
+`;
 
-    // 3. Update the release notes
+    // Update the release with mock notes
     await octokit.rest.repos.updateRelease({
       owner,
       repo,
@@ -49,7 +40,7 @@ async function run() {
       body: notes
     });
 
-    console.log("✅ Release notes updated!");
+    console.log("✅ Release notes updated with mock data!");
   } catch (error) {
     core.setFailed(error.message);
   }
