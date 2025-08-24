@@ -1,0 +1,17 @@
+{
+  "name": "release-notes-action",
+  "version": "1.0.0",
+  "description": "GitHub Action to auto-generate release notes with OpenAI",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.js -o dist"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.0"
+  }
+}
